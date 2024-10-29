@@ -5,8 +5,8 @@ import random
 from random import randint
 
 #dicionário contendo dados do investidor
-cpf = { "cadastro_cpf" : 12345678900,
-       "Senha" : 123456,
+cpf = { "cadastro_cpf" : 1, #12345678900
+       "Senha" : 1, #123456
        "Nome" : "Ravi",
        "CPF" : "123.456.789-00",
 }
@@ -50,7 +50,6 @@ def login():
         else:
                 print("Login inválido")
 
-
 login()
 
 def tentativa_senha():
@@ -66,47 +65,41 @@ def tentativa_senha():
             elif tentativas == 1:
                 print("Senha inválida. Você possui {} tentativa restante.".format(tentativas))
                 tentativas -= 1
-            elif tentativas == 0:
+            else:
                 print("Programa finalizado pelo limite de tentativas excedidas.")
                 quit()
 
 def saldo():
     print("Para consultar o saldo atual, informe sua senha.")
     tentativa_senha()
+
     print("")
-    for n in range(2,4):
+    for n in range(2,4): #printa nome e cpf
         print("{}: {}".format(keys_cpf[n], cpf[keys_cpf[n]]))
-
-    print("")
-
+    
     arquivo_saldo = open("saldo_atual.txt", "r")
-    saldo_linhas = arquivo_saldo.readlines()
+    saldo_linhas = arquivo_saldo.readlines() #printa as 4 linhas do arquivo "saldo_atual.txt", que possui: {reais, btc, eth, xrp}
     print("Reais: {:.2f}".format(float(saldo_linhas[0])))
     print("Bitcoin: {:.8f}".format(float(saldo_linhas[1])))
     print("Ethereum: {:.7f}".format(float(saldo_linhas[2])))
     print("Ripple: {:.4f}".format(float(saldo_linhas[3])))
     arquivo_saldo.close()
 
-
-#acao = 2
 def extrato():
     print("Para consultar o extrato, informe sua senha.")
     tentativa_senha()
     print("")
     print("Extrato:")
     arquivo_extrato = open("extrato.txt", "r")
-    for linha in arquivo_extrato.readlines():
+    linhas = arquivo_extrato.readlines()
+    if len(linhas) == 0:
+        print("Nenhum extrato efetuado.")
+    else:
+        for linha in linhas:
             print(linha.strip())
-    arquivo_extrato.close
-    # se o extrato nao for nenhum, falar "nenhum extrato"
 
-
-num = 1
-#acao = 3
 def depositar():
     while True:
-        valor_deposito = float(input("Valor do depósito: "))
-
         # confere os valores antes do deposito
         arquivo_saldo = open("saldo_atual.txt", "r")
         saldo_linhas = arquivo_saldo.readlines()
@@ -116,6 +109,7 @@ def depositar():
         ripple = float(saldo_linhas[3])
         arquivo_saldo.close()
 
+        valor_deposito = float(input("Valor do depósito: "))
 
         if valor_deposito < 0:
             print("Digite um valor válido. Caso queira cancelar, digite '0'.")
@@ -132,35 +126,24 @@ def depositar():
             print(horario_extrato_convertido)
 
             arquivo_saldo = open("saldo_atual.txt", "w")
-            # arquivo_saldo.write("%s %s %s %s\n" % (float(reais_deposito), float(bitcoin), float(ethereum), float(ripple)))
-            arquivo_saldo.write(str("%s\n" % (reais_atualizado)))
-            arquivo_saldo.write(str("%s\n" % (bitcoin)))
-            arquivo_saldo.write(str("%s\n" % (ethereum)))
-            arquivo_saldo.write(str("%s\n" % (ripple)))
+            arquivo_saldo.write("%s\n%s\n%s\n%s" % (float(reais_atualizado), float(bitcoin), float(ethereum), float(ripple)))
             arquivo_saldo.close()
 
             #registrar o deposito no extrato.txt
-            tipo = "REAL"
             cotacao = "0.0"
-            taxa = "0.00"
             arquivo_extrato = open("extrato.txt", "a")
-            arquivo_extrato.write("%s + %6s %4s CT: %9s TX: %3s REAL: %7s BTC: %10s ETH: %9s XRP: %7s\n" % (horario_extrato_convertido, str(valor_deposito),
-                                                 tipo,str(cotacao), str(taxa), str(reais_atualizado), str(bitcoin), str(ethereum), str(ripple)))
-            
+            arquivo_extrato.write("%s + %6f CT: %9f TX: 0.00 REAL: %7f BTC: %10f ETH: %9f XRP: %7f\n" % (horario_extrato_convertido, float(valor_deposito), float(cotacao), 
+                                                                                                        float(reais_atualizado), float(bitcoin), float(ethereum), float(ripple)))
             arquivo_extrato.close()
 
             print("Depósito de {} REAL adicionado à conta.".format(valor_deposito))
             saldo()
             break
-    #a cada depósito, o registra na lista "extrato"
 
-#acao = 4
 def sacar():
     print("Para sacar, informe sua senha.")
     tentativa_senha()
     while True:
-        valor_saque = float(input("Valor do saque: "))
-
         arquivo_saldo = open("saldo_atual.txt", "r")
         saldo_linhas = arquivo_saldo.readlines()
         reais = float(saldo_linhas[0])
@@ -169,6 +152,7 @@ def sacar():
         ripple = float(saldo_linhas[3])
         arquivo_saldo.close()
 
+        valor_saque = float(input("Valor do saque: "))
 
         if float(valor_saque) > float(reais):
             print("O saldo total deve permanecer positivo. Digite '0' para voltar ao menu ou insira um valor adequado.")
@@ -667,7 +651,6 @@ def vender_criptomoedas():
 
 #acao = 7
 def atualizar_cotacao():   
-
     print("Atualizar cotação")
     #printar cotacoes moedas
     print("Cotações atuais:")
@@ -734,7 +717,6 @@ def atualizar_cotacao():
 
 #acao = 8
 def sair():
-    
     print("Operação finalizada.")
     quit()
 
