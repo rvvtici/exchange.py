@@ -13,6 +13,9 @@ cpf = { "cadastro_cpf" : 1, #12345678900
 keys_cpf = cpf.keys()
 keys_cpf = list(keys_cpf)
 
+
+
+
 #obter horário atual
 def horario():
     horario_extrato = dt.datetime.now()
