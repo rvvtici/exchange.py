@@ -1,3 +1,7 @@
+import random
+from random import randint
+
+
 def get_dados():
     arquivo_investidor = open("investidor.txt", "r")
     linhas_investidor = arquivo_investidor.readlines()
@@ -100,7 +104,7 @@ def cotacao_atual():
     print("bitcoin: %s", ct_bitcoin)
     print("ethereum: %s", ct_ethereum)
     print("ripple: %s", ct_ripple)
-    # return ct_bitcoin, ct_ethereum, ct_ripple
+    return ct_bitcoin, ct_ethereum, ct_ripple
 
 def comprar_criptomoedas():
     cotacao_atual()
@@ -109,7 +113,39 @@ def vender_criptomoedas():
     cotacao_atual()
 
 def atualizar_cotacao():
-    cotacao_atual()
+    ct_btc, ct_eth, ct_xrp = cotacao_atual()
+    ct_original_xrp = 2.64
+    ct_original_btc = 347815.6
+    ct_original_eth = 19387.17
+    cotacoes_originais = [347815.6, 19387.17, 2.64]
+    novas_cotacoes = [0,0,0]
+    digito = int(input("Digite 1 para aualizar as cotações atuais. Digite 0 para sair."))
+    
+    random_aumento_ou_diminuicao = [0, 0, 0]
+    
+    if digito == 1:
+
+        #random se vai aumentar a cotacao original ou diminuir (1 a 5%)
+
+        for i in range(3):
+            x = randint(1,2) # 1 aumenta, 2 diminui
+            random_aumento_ou_diminuicao[i] = x
+        
+        for j in range(3):
+            y = randint(1,5) # porcentagem de 1 a 5%
+            if random_aumento_ou_diminuicao[i] == 1:
+                att = cotacoes_originais[i] * y/100
+            
+            print(cotacoes_originais[i])
+            print(y)
+            print(y/100)
+
+            novas_cotacoes[i] = att
+            print(novas_cotacoes[i])
+
+    
+        
+
 
 def menu():
     opcoes = [
@@ -131,3 +167,5 @@ while True:
     if acao == 1:
         saldo()
         menu()
+    if acao == 7:
+        atualizar_cotacao()
