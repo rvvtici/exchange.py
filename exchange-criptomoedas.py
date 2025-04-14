@@ -59,10 +59,10 @@ def saldo():
         print(nomes_cripto[i], valores_cripto[i], siglas_cripto[i])
     return real, btc, eth, xrp 
 
-def nova_linha_extrato(tipo, valor, cotacao, real, btc, eth, xrp):
+def nova_linha_extrato(moeda, tipo, valor, cotacao, real, btc, eth, xrp):
     arquivo_extrato = open("extrato.txt", "a")
-    print("%s + %6f CT: %9f TX: 0.00 REAL: %7f BTC: %10f ETH: %9f XRP: %7f\n" % (tipo, valor, cotacao, real, btc, eth, xrp)) 
-    arquivo_extrato.write("%s + %6f CT: %9f TX: 0.00 REAL: %7f BTC: %10f ETH: %9f XRP: %7f\n" % (tipo, valor, cotacao, real, btc, eth, xrp)) 
+    print("%s %s %6f CT: %9f TX: 0.00 REAL: %7f BTC: %10f ETH: %9f XRP: %7f\n" % (moeda, tipo, valor, cotacao, real, btc, eth, xrp)) 
+    arquivo_extrato.write("%s %s %6f CT: %9f TX: 0.00 REAL: %7f BTC: %10f ETH: %9f XRP: %7f\n" % (moeda, tipo, valor, cotacao, real, btc, eth, xrp)) 
     arquivo_extrato.close()
 
 def overwrite_saldo(real, btc, eth, xrp):
@@ -79,6 +79,7 @@ def extrato():
             print(linha.strip())
 
 def depositar():
+    print("--depositar--")
     real, btc, eth, xrp = saldo()
     # try:
     
@@ -90,72 +91,106 @@ def depositar():
 
     real += valor
     cotacao = 0
-    tipo = "REAL"
+    moeda = "REAL"
+    tipo = "+"
 
     overwrite_saldo(real, btc, eth, xrp)
-    nova_linha_extrato(tipo, valor, cotacao, real, btc, eth, xrp)
+    nova_linha_extrato(moeda, tipo, valor, cotacao, real, btc, eth, xrp)
     
 
 def sacar():
     real, btc, eth, xrp = saldo()
     real = float(real)
-    valor = float(input("valor saque: "))
-    real += valor
-    tipo = "REAL"
-    cotacao = 0
-    overwrite_saldo(real, btc, eth, xrp)
-    # nova_linha_extrato(real, btc, eth, xrp, cotacao)
-    nova_linha_extrato(tipo, valor, cotacao, real, btc, eth, xrp)
+    while True:
+        valor = float(input("Valor do saque: "))
+        if valor > real:
+            print("Saldo não pode ser negativo. Para cancelar o saque, digite 0.")
+        elif valor == 0:
+            print("Saque cancelado.")
+            break
+        else:
+            real -= valor
+            moeda = "REAL"
+            tipo = "-"
+            cotacao = 0
+            overwrite_saldo(real, btc, eth, xrp)
+            nova_linha_extrato(moeda, tipo, valor, cotacao, real, btc, eth, xrp)
+            break
 
 
 def cotacao_atual():
     arquivo_cotacao = open("cotacao.txt", "r")
     cotacao_linhas = arquivo_cotacao.readlines()
-    ct_bitcoin = cotacao_linhas[0]
-    ct_ethereum = cotacao_linhas[1]
-    ct_ripple = cotacao_linhas[2]
-    print("cotacao atual :")
-    print("bitcoin: %s", ct_bitcoin)
-    print("ethereum: %s", ct_ethereum)
-    print("ripple: %s", ct_ripple)
+    ct_bitcoin = cotacao_linhas[0].strip() # strip(): pra remover o \n
+    ct_ethereum = cotacao_linhas[1].strip()
+    ct_ripple = cotacao_linhas[2].strip()
+    print("Cotação atual:")
+    print("Bitcoin: {} BTC".format(ct_bitcoin))
+    print("Ethereum: {} ETH".format(ct_ethereum))
+    print("Ripple: {} XRP".format(ct_ripple))
     return ct_bitcoin, ct_ethereum, ct_ripple
 
 def comprar_criptomoedas():
-    cotacao_atual()
+    print("---comprar criptomoedas---")
+    cot_btc, cot_eth, cot_xrp = cotacao_atual()
+    real, btc, eth, xrp = saldo()
+    moedas = [real, btc, eth, xrp]
+    cotacoes = [cot_btc, cot_eth, cot_xrp]
+    nomes_cripto = ["BTC", "ETH", "XRP"]
+
+    #digito criptomoeda selecionada
+    moeda_selecionada = int(input("1. Bitcoin (BTC) | 2. Ethereum (ETH) | 3. Ripple (XRP)\nDigite a criptomoeda desejada: "))
+    
+    taxas_compra = [2, 1, 1]
+    valor_compra = float(input("Valor da compra: "))
+    print("Taxa de compra de {}%.".format(taxas_compra[moeda_selecionada-1]))
+    porcentagem_adicionada = valor_compra * taxas_compra[moeda_selecionada-1]/100
+
+    
+    valor_total = valor_compra + porcentagem_adicionada
+    valor_convertido = valor_compra/float(cotacoes[moeda_selecionada-1])
+    print("Valor da compra + taxa: {}. Será efetuado a compra de {} {}".format(valor_total, valor_convertido, nomes_cripto[moeda_selecionada-1]))
+    confirmar = int(input("1. Confirmar | 0. Cancelar\n"))
+    if confirmar == 1:
+        real -= valor_total
+        moedas[moeda_selecionada] += valor_convertido
+
+        tipo = "+"
+        nova_linha_extrato(nomes_cripto[moeda_selecionada-1], tipo, valor_convertido, float(cotacoes[moeda_selecionada-1]), float(real), float(btc), float(eth), float(xrp))
+        overwrite_saldo(float(real), float(btc), float(eth), float(xrp))
+    else:
+        pass
+
 
 def vender_criptomoedas():
+    print("---vender criptomoedas---")
     cotacao_atual()
 
 def atualizar_cotacao():
-    ct_btc, ct_eth, ct_xrp = cotacao_atual()
-    ct_original_xrp = 2.64
-    ct_original_btc = 347815.6
-    ct_original_eth = 19387.17
     cotacoes_originais = [347815.6, 19387.17, 2.64]
     novas_cotacoes = [0,0,0]
-    digito = int(input("Digite 1 para aualizar as cotações atuais. Digite 0 para sair."))
+    digito = int(input("1. Atualizar cotações | 0. Sair\n"))
     
     random_aumento_ou_diminuicao = [0, 0, 0]
     
     if digito == 1:
 
-        #random se vai aumentar a cotacao original ou diminuir (1 a 5%)
-
+        #random se vai aumentar a cotacao original ou diminuir
         for i in range(3):
-            x = randint(1,2) # 1 aumenta, 2 diminui
-            random_aumento_ou_diminuicao[i] = x
+            soma_ou_subtracao = randint(1,2) # 1 aumenta, 2 diminui
+            random_aumento_ou_diminuicao[i] = soma_ou_subtracao
         
+        # aumenta de 1 a 5%
         for j in range(3):
-            y = randint(1,5) # porcentagem de 1 a 5%
+            porcentagem = randint(1,5) # porcentagem de 1 a 5%
+            valor_modificado = cotacoes_originais[j] * porcentagem/100 # multiplica criptomoeda pela porcentagem, obtendo 1 a 5 % do valor origiinal
             if random_aumento_ou_diminuicao[i] == 1:
-                att = cotacoes_originais[i] * y/100
-            
-            print(cotacoes_originais[i])
-            print(y)
-            print(y/100)
+                novas_cotacoes[j] = cotacoes_originais[j] + valor_modificado
+            else:
+                novas_cotacoes[j] = cotacoes_originais[j] - valor_modificado
 
-            novas_cotacoes[i] = att
-            print(novas_cotacoes[i])
+    else:
+            pass
 
 
 def menu():
